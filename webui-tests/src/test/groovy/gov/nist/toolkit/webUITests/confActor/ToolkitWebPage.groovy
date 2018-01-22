@@ -4,23 +4,23 @@ import com.gargoylesoftware.htmlunit.AjaxController
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import com.gargoylesoftware.htmlunit.WebClient
 import com.gargoylesoftware.htmlunit.WebRequest
-import com.gargoylesoftware.htmlunit.html.HtmlButton
-import com.gargoylesoftware.htmlunit.html.HtmlDivision
-import com.gargoylesoftware.htmlunit.html.HtmlOption
-import com.gargoylesoftware.htmlunit.html.HtmlPage
-import com.gargoylesoftware.htmlunit.html.HtmlSelect
-import com.gargoylesoftware.htmlunit.html.HtmlTextInput
+import com.gargoylesoftware.htmlunit.html.*
 import gov.nist.toolkit.toolkitApi.SimulatorBuilder
 import gov.nist.toolkit.webUITests.confActor.exceptions.TkWtNotFoundEx
+import gov.nist.toolkit.xdsexception.client.ToolkitRuntimeException
 import spock.lang.Shared
 import spock.lang.Specification
 
 abstract class ToolkitWebPage extends Specification  {
     @Shared WebClient webClient
     @Shared HtmlPage page
+    // http://localhost:8888/xdstools2-5.1.0/
     @Shared int toolkitPort = 8888
     @Shared String toolkitHostName = "http://localhost"
     @Shared String toolkitBaseUrl
+    static final String toolkitPassword = "easy"
+    // set webAppContext to an empty string if using jetty with default context
+    @Shared String webAppContext = 'xdstools2-5.1.0'
     @Shared SimulatorBuilder spi
     static final String simUser = "webuitest"
 
@@ -28,7 +28,7 @@ abstract class ToolkitWebPage extends Specification  {
     static final int maxWaitTimeInMills = 60000*5 // 5 minutes
 
     void composeToolkitBaseUrl() {
-        this.toolkitBaseUrl = String.format("%s:%s", toolkitHostName, toolkitPort)
+        this.toolkitBaseUrl = String.format("%s:%s/%s", toolkitHostName, toolkitPort, webAppContext)
     }
 
     void setupSpi() {
@@ -70,6 +70,29 @@ abstract class ToolkitWebPage extends Specification  {
     def setup() {
     }
     def cleanup() {
+    }
+
+
+    String findItTestEcDir() {
+        URL warMarker = this.getClass().getResource('/war/war.txt');
+        if (warMarker == null) {
+            System.out.println("Cannot locate WAR root for test environment")
+            throw new ToolkitRuntimeException("Cannot locate WAR root for test environment")
+        }
+        File warHome = new File(warMarker.toURI().path).parentFile
+        if (!warHome || !warHome.isDirectory()) throw new ToolkitRuntimeException('WAR not found')
+        URL externalCacheMarker = this.getClass().getResource('/external_cache/external_cache.txt')
+        if (externalCacheMarker == null) {
+            System.out.println("Cannot locate external cache for test environment")
+            throw new ToolkitRuntimeException("Cannot locate external cache for test environment")
+        }
+        File externalCache = new File(externalCacheMarker.toURI().path).parentFile
+
+        // Important to set this before war home since it is overriding contents of toolkit.properties
+        if (!externalCache || !externalCache.isDirectory())throw new ToolkitRuntimeException('External Cache not found')
+//        ExternalCacheManager.reinitialize(externalCache)
+
+        return externalCache
     }
 
 
@@ -121,6 +144,16 @@ abstract class ToolkitWebPage extends Specification  {
             page = addButton.click()
 
             selectOptionByValue(sessionSelector, sessionName)
+        }
+    }
+
+    HtmlAnchor findAnchor(String anchorText) {
+        NodeList anchorNl = page.getElementsByTagName("a")
+        final Iterator<HtmlAnchor> nodesIterator = anchorNl.iterator()
+        for (HtmlAnchor anchor : nodesIterator) {
+            if (anchor.getTextContent().equals(anchorText)) {
+                return anchor
+            }
         }
     }
 }

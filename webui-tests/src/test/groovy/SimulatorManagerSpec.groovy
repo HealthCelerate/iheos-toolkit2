@@ -44,7 +44,6 @@ class SimulatorManagerSpec extends ToolkitWebPage {
         page.asText().contains("Simulator Manager") and page.asText().contains("Add new simulator to this test session")
     }
 
-
     def 'actor type'(){
        when:
        List<HtmlSelect> selectList = page.getByXPath("//select[contains(@class, 'gwt-ListBox') and contains(@class, 'selectActorTypeMc')]")  // Substring match. No other CSS class must contain this string.

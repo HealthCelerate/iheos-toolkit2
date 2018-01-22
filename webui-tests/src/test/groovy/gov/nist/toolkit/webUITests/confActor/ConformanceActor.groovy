@@ -23,6 +23,7 @@ abstract class ConformanceActor extends ToolkitWebPage {
     def cleanup() {
     }
 
+
     def 'Select session.'() {
         when:
         loadPage(String.format("%s/#Tool:Simulators",toolkitBaseUrl))
@@ -48,15 +49,7 @@ abstract class ConformanceActor extends ToolkitWebPage {
 
     def 'Find and click the Conformance Tests link.'() {
         when:
-        HtmlAnchor conformanceTestAnchor
-        NodeList anchorNl = page.getElementsByTagName("a")
-        final Iterator<HtmlAnchor> nodesIterator = anchorNl.iterator()
-        for (HtmlAnchor anchor : nodesIterator) {
-            if (anchor.getTextContent().equals("Conformance Tests")) {
-                conformanceTestAnchor = anchor
-                break
-            }
-        }
+        HtmlAnchor conformanceTestAnchor  = findAnchor("Conformance Tests")
 
         then:
         conformanceTestAnchor != null
@@ -67,7 +60,6 @@ abstract class ConformanceActor extends ToolkitWebPage {
 
         then:
         page.asText().contains("Test Context")
-
     }
 
     def 'Cancel off any unexpected dialog box.'() {

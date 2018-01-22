@@ -53,19 +53,27 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <version>2.19.1</version>
                 <configuration>
-                    <!-- debug individual tests -->
-                    <!--<includes>-->
+                    <!-- To save time... -->
+                    <!-- 1. For debugging purposes,
+                                                use Tomcat with the xdstools2 war file instead of the Jetty.
+                                                  This can be done by
+                                                    a) commenting off the artifactId jetty-maven-plugin below this file.
+                                                    b) Updating the value of ToolkitWebPage's   @Shared String toolkitHostName = "http://localhost" to reflect the Tomcat URL.
+                     -->
+                    <!-- 2. Debug individual tests -->
+                    <includes>
+                        <include>ConfigureEcInToolkitSpec.java</include>
                         <!--<include>**/SimulatorManagerSpec.java</include>-->
                         <!--<include>**/RegistryActorSimulatorSpec.java</include>-->
                         <!--<include>**/RepositoryActorSimulatorSpec.java</include>-->
                         <!--<include>**/RecipientActorSimulatorSpec.java</include>-->
                         <!--<include>**/RespondingGatewayActorSimulatorSpec.java</include>-->
-                    <!--</includes>-->
-                    <!-- Run all tests -->
-                    <includes>
-                        <include>**/SimulatorManagerSpec.java</include>
-                        <include>**/*ActorSimulatorSpec.java</include>
                     </includes>
+                    <!-- Run sim maanger test and then all actor tests -->
+                    <!--<includes>-->
+                        <!--<include>**/SimulatorManagerSpec.java</include>-->
+                        <!--<include>**/*ActorSimulatorSpec.java</include>-->
+                    <!--</includes>-->
                     <!-- We should NOT ignore test failures. TestFailureIgnore should be false. -->
                     <testFailureIgnore>false</testFailureIgnore>
                 </configuration>
@@ -119,12 +127,15 @@
                     </execution>
                 </executions>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.2.21.v20170120</version>
                 <configuration>
-                    <!-- Enter any systemProperties here. -->
+                    begin-comment
+                     *** Enter any systemProperties here. ***
+                    end-comment
                     <jettyXml>${basedir}/src/test/etc/jetty.xml,${basedir}/src/test/etc/jetty-http.xml,${basedir}/src/test/etc/jetty-https.xml,${basedir}/src/test/etc/jetty-ssl.xml,${basedir}/src/test/etc/jetty-logging.xml</jettyXml>
                     <war>../xdstools2/target/xdstools2-${project.version}.war</war>
                     <stopKey>alpha</stopKey>
@@ -147,6 +158,7 @@
                     </execution>
                 </executions>
             </plugin>
+        -->
         </plugins>
     </build>
 </project>
